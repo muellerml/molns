@@ -215,7 +215,7 @@ class OpenStackProvider(OpenStackBase):
         for instance_id in instance_ids:
             instances.append(self.nova.servers.get(instance_id))
         self._stop_vm(instances)
-
+        
     def _resume_instances(self, instance_ids):
         self._connect()
         for instance_id in instance_ids:
@@ -354,7 +354,12 @@ class OpenStackProvider(OpenStackBase):
        # Try to attach a floating IP to the controller
         logging.info("Attaching floating ip to the server...")
         try:
-            floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
+            floating_ip = None
+            for ip in self.nova.floating_ips.list():
+                if ip.instance_id == None:
+                    floating_ip = ip
+            if floating_ip == None:
+                floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
             instance.add_floating_ip(floating_ip)
             logging.debug("ip={0}".format(floating_ip.ip))
             return floating_ip.ip
@@ -396,6 +401,9 @@ class OpenStackController(OpenStackBase):
         else:
             self.provider._resume_instances([instances.provider_instance_identifier])
 
+    def restart_instance(self, instances):
+        self.stop_instance(instances)
+        inst =  self.resume_instance(instances)
     def stop_instance(self, instances):
         if isinstance(instances, list):
             pids = [x.provider_instance_identifier for x in instances]

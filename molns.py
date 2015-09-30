@@ -251,6 +251,20 @@ class MOLNSController(MOLNSbase):
             return {'type':'table','column_names':['name', 'provider'], 'data':table_data}
     
     @classmethod
+    def restart_controller(cls, args, config):
+        """ Should restart a controller. """
+        if len(args) == 0:
+            raise MOLNSException("USAGE: molns controller restart name")
+        c = config.get_object(name=args[0], kind='Controller')
+        instance_list = config.get_controller_instances(controller_id=c.id)
+        inst = c.restart_instance(instance_list)
+        inst = config.get_controller_instances(controller_id=c.id)[0]
+        sshdeploy = SSHDeploy(config=c.provider, config_dir=config.config_dir)
+        sshdeploy.deploy_molns_webserver(inst.ip_address)
+        
+        
+        
+    @classmethod
     def show_controller(cls, args, config):
         """ Show all the details of a controller config. """
         if len(args) == 0:
@@ -465,8 +479,7 @@ class MOLNSController(MOLNSbase):
     
         else:
             print "No instance running for this controller"
-
-
+            
     @classmethod
     def terminate_controller(cls, args, config):
         """ Terminate the head node of a MOLNs controller. """
@@ -1403,6 +1416,8 @@ COMMAND_LIST = [
                 function=MOLNSController.setup_controller),
             Command('list', {'name':None},
                 function=MOLNSController.list_controller),
+            Command('restart', {'name':None},
+                function=MOLNSController.restart_controller),
             Command('show', {'name':None},
                 function=MOLNSController.show_controller),
             Command('delete', {'name':None},
