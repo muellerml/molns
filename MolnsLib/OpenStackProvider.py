@@ -403,7 +403,7 @@ class OpenStackController(OpenStackBase):
 
     def restart_instance(self, instances):
         self.stop_instance(instances)
-        inst =  self.resume_instance(instances)
+        self.resume_instance(instances)
     def stop_instance(self, instances):
         if isinstance(instances, list):
             pids = [x.provider_instance_identifier for x in instances]
