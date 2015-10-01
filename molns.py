@@ -260,6 +260,7 @@ class MOLNSController(MOLNSbase):
         inst = c.restart_instance(instance_list)
         inst = config.get_controller_instances(controller_id=c.id)[0]
         sshdeploy = SSHDeploy(config=c.provider, config_dir=config.config_dir)
+        sshdeploy.deploy_ipython_controller(inst.ip_address)
         sshdeploy.deploy_molns_webserver(inst.ip_address)
         
         
